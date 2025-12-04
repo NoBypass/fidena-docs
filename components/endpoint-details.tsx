@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Lock, AlertCircle } from "lucide-react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { CodeBlock } from "./code-block"
+import browserslist from "browserslist";
 
 interface Parameter {
   name: string
@@ -18,6 +19,7 @@ interface Parameter {
 
 interface RequestBody {
   required: boolean
+  description?: string
   content: Record<
     string,
     {
@@ -31,7 +33,11 @@ interface RequestBody {
 
 interface Response {
   description: string
-  body: any
+  body?: {
+    type: string
+    required: boolean
+    default?: any
+  }[]
 }
 
 interface Endpoint {
@@ -189,9 +195,15 @@ export function EndpointDetails({ endpoint, isAuthenticated }: EndpointDetailsPr
           {endpoint.requestBody ? (
             <Card>
               <CardHeader>
-                <CardTitle>Request Body</CardTitle>
+                <CardTitle>Request Body {endpoint.requestBody.required && <Badge
+                    variant="destructive"
+                    className="text-xs">
+                    required
+                  </Badge>}
+                </CardTitle>
                 <CardDescription>
-                  {endpoint.requestBody.required ? "Required" : "Optional"} request body
+                  {endpoint.requestBody.description ? endpoint.requestBody.description
+                  : endpoint.requestBody.required ? "Required request body" : "Optional request body"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -254,7 +266,20 @@ export function EndpointDetails({ endpoint, isAuthenticated }: EndpointDetailsPr
               </CardHeader>
               <CardContent>
                 {response.body ? (
-                  <CodeBlock code={JSON.stringify(response.body, null, 2)} language="json" />
+                    <CodeBlock
+                      code={JSON.stringify(
+                        Object.fromEntries(
+                          Object.entries(response.body).map(([key, field]) => [
+                            key,
+                            field.default || `<${field.type}>`,
+                          ]),
+                        ),
+                        null,
+                        2,
+                      )}
+                      language="json"
+                    />
+                  // <CodeBlock code={JSON.stringify(response.body, null, 2)} language="json" />
                 ) : (
                   <p className="text-sm text-muted-foreground">No response body</p>
                 )}

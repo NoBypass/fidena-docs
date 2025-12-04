@@ -87,7 +87,6 @@ export function ApiTester({ endpoint, isAuthenticated, baseUrl }: ApiTesterProps
       if (isAuthenticated) {
         fetchOptions.headers = {
           ...fetchOptions.headers,
-          Authorization: "Bearer mock-token",
         }
       }
 
@@ -99,12 +98,7 @@ export function ApiTester({ endpoint, isAuthenticated, baseUrl }: ApiTesterProps
         }
       }
 
-      console.log("[v0] Making fetch request to:", fullUrl)
-      console.log("[v0] Fetch options:", fetchOptions)
-
       const res = await fetch(fullUrl, fetchOptions)
-
-      console.log("[v0] Response status:", res.status, res.statusText)
 
       let data: any
       const contentType = res.headers.get("content-type")
@@ -115,15 +109,12 @@ export function ApiTester({ endpoint, isAuthenticated, baseUrl }: ApiTesterProps
         data = text || null
       }
 
-      console.log("[v0] Response data:", data)
-
       setResponse({
         status: res.status,
         statusText: res.statusText,
         data,
       })
     } catch (err: any) {
-      console.error("[v0] Fetch error:", err)
       setError(err.message || "Failed to fetch")
       setResponse({
         status: 0,
